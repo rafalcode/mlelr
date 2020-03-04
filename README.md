@@ -1,3 +1,8 @@
+# this fork, why?
+
+This well documented implementation should serve to make logistic regression
+functions less opaque. This fork to be annotated and re-styled to RF(only) convenience.
+
 # mlelr
 A reference implementation of logistic regression in C
 
