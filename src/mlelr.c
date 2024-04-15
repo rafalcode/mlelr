@@ -517,10 +517,10 @@ int mlelr (dataset_t *ds, model *mod)
 
     }
 
-    printout("\nMaximum Likelihood Parameter Estimates\n%s",
-               "=======================================\n");
+    printout("\nParameter Value Estimates(ValueEst)\n%s",
+               "===================================\n");
     printout("%20s%4s%12s%10s%12s%12s\n",
-        "Parameter", "DV", "Estimate", "Std Err", "Wald Chisq", "Pr > Chisq");
+        "Parameter", "DV", "ValueEst", "Std Err", "Wald Chisq", "Pr > Chisq");
 
 
     for (i = 0; i < K; i++) {
