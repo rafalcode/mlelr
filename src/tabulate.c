@@ -38,13 +38,11 @@ int frequency_table (dataset_t *ds, int var)
     double obs[2];
     double target;
     double weight;
-    char *handle;
     char *handle_prefix = "Frequency table for: ";
 
     printlog(VERBOSE, "Building frequency table for variable '%s' in dataset '%s'\n", ds->varnames[var], ds->handle);
 
-
-    handle = (char *) emalloc( strlen(handle_prefix) + strlen(ds->varnames[var]) + 1 );
+    char *handle = (char *) emalloc( strlen(handle_prefix) + strlen(ds->varnames[var]) + 1 );
     strcpy(handle, handle_prefix);
     strcat(handle, ds->varnames[var]);
 
@@ -85,7 +83,6 @@ int frequency_table (dataset_t *ds, int var)
 int tabulate (dataset_t *ds, model *mod)
 {
     int i, j, k;
-    char **varnames;
     int found;
     double freq_obs[2];
     double target;
@@ -95,19 +92,18 @@ int tabulate (dataset_t *ds, model *mod)
     printlog(VERBOSE, "Tabulating...\n");
 
     /* initialize data structures */
-    varnames = (char **) emalloc((2 + mod->numiv) * sizeof(char *));
-    for (i = 0; i < mod->numiv; i++) {
-        varnames[i] = mod->ivnames[i];
-    }
+    // varnames, the names of the indep vars, plus two extra names
+    char **varnames = (char **) emalloc((2 + mod->numiv) * sizeof(char *));
+    for (i = 0; i < mod->numiv; i++) 
+        varnames[i] = mod->ivnames[i]; 
     varnames[i++] = mod->dvname;
     varnames[i] = estrdup("_Count");
     mod->xtab = add_dataset("_mlelr_xtab", 2 + mod->numiv, varnames, 0);
 
     /* array of datasets to store univariate frequencies */
     mod->freqs = (dataset_t **) emalloc((2 + mod->numiv) * sizeof(dataset_t *));
-    for (i = 0; i < mod->numiv; i++) {
+    for (i = 0; i < mod->numiv; i++)
         mod->freqs[i] = add_dataset("_mlelr_freq_iv", 2, freqvars, 0);
-    }
     mod->freqs[i] = add_dataset("_mlelr_freq_dv", 2, freqvars, 0);
 
     obs = (double *) emalloc((2 + mod->numiv) * sizeof(double));
@@ -176,5 +172,4 @@ int tabulate (dataset_t *ds, model *mod)
     printlog(VERBOSE, "Tabulation complete.\n");
 
     return 0;
-
 }
