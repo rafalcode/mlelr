@@ -31,9 +31,9 @@ Copyright (C) 2015 Scott A. Czepiel
 
 static char *freqvars[] = {"Value", "Freq"};
 
-int frequency_table (dataset *ds, int var) {
-
-    dataset *freq;
+int frequency_table (dataset_t *ds, int var)
+{
+    dataset_t *freq;
     int i, j, found;
     double obs[2];
     double target;
@@ -82,8 +82,8 @@ int frequency_table (dataset *ds, int var) {
     return 0;
 }
 
-int tabulate (dataset *ds, model *mod) {
-
+int tabulate (dataset_t *ds, model *mod)
+{
     int i, j, k;
     char **varnames;
     int found;
@@ -104,7 +104,7 @@ int tabulate (dataset *ds, model *mod) {
     mod->xtab = add_dataset("_mlelr_xtab", 2 + mod->numiv, varnames, 0);
 
     /* array of datasets to store univariate frequencies */
-    mod->freqs = (dataset **) emalloc((2 + mod->numiv) * sizeof(dataset *));
+    mod->freqs = (dataset_t **) emalloc((2 + mod->numiv) * sizeof(dataset_t *));
     for (i = 0; i < mod->numiv; i++) {
         mod->freqs[i] = add_dataset("_mlelr_freq_iv", 2, freqvars, 0);
     }

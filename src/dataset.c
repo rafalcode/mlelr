@@ -42,7 +42,6 @@ const double SYSMIS = 0xffefffffffffffff;
 
 struct dataspace dataspace;
 
-
 /* static function declarations */
 static int compare_obs (const void *v1, const void *v2);
 static int string_to_double(char *str, double* d);
@@ -50,29 +49,24 @@ static int string_to_double(char *str, double* d);
 
 /* public function definitions */
 
-void init_dataspace (void) {
-
-    /* called once at program instantiation to initialize the dataspace */
+void init_dataspace(void) /* called once at program instantiation to initialize the dataspace */
+{
     dataspace.n = 0;
     dataspace.size = 1;
-    dataspace.datasets = (dataset *) emalloc(dataspace.size * sizeof(dataset));
+    dataspace.datasets = (dataset_t*) emalloc(dataspace.size * sizeof(dataset_t));
 
     printlog(VERBOSE, "Dataspace initialized with space for %d datasets.\n", dataspace.size);
-
 }
 
-
-int import_dataset (char *handle, char *filename, char delim) {
-
-    /* import a delimited text file as a new dataset */
-
+int import_dataset (char *handle, char *filename, char delim) /* import a delimited text file as a new dataset */
+{
     int i, j;
     FILE *ifp;
     char **varnames;
     int nvars = 0;
     char *line;
     double *obs;
-    dataset *ds;
+    dataset_t *ds;
 
     printlog(INFO, "%s%s\n", "Importing dataset from file: ", filename);
 
@@ -82,10 +76,7 @@ int import_dataset (char *handle, char *filename, char delim) {
         return -1;
     }
 
-    /***
-        read variable names from first row
-    ***/
-
+    /*** read variable names from first line/row ***/
     if (csvgetline(ifp, delim, 0) == NULL) {
         printlog(INFO, "%s%s\n", "Error:  File is empty, ", filename);
         return -1;
@@ -97,7 +88,7 @@ int import_dataset (char *handle, char *filename, char delim) {
         return -1;
     }
 
-    printlog(INFO, "%s%d\n", "Number of variables found: ", nvars);
+    printlog(INFO, "%s%d\n", "@line1: Number of variables found (nvars): ", nvars);
 
     /* allocate space to store variable names */
     varnames = (char **) emalloc(nvars * sizeof(char *));
@@ -110,10 +101,7 @@ int import_dataset (char *handle, char *filename, char delim) {
     }
     printlog(INFO, "\n");
 
-    /***
-        add a new dataset to the dataspace
-    ***/
-
+    /*** add a new (first) dataset to the dataspace ***/
     ds = add_dataset(handle, nvars, varnames, 1);
     obs = (double *) emalloc(nvars * sizeof(double));
 
@@ -129,9 +117,7 @@ int import_dataset (char *handle, char *filename, char delim) {
 
         /* parse the data in each field and store in obs */
         for (j = 0; j < nvars; j++) {
-
             if (string_to_double(csvfield(j), &obs[j]) < 0) {
-
                 /* set to sysmis if could not read as double,
                    this is a debatable solution, but really
                    only affects edge cases unlikely to come up
@@ -152,19 +138,16 @@ int import_dataset (char *handle, char *filename, char delim) {
     return 0;
 }
 
-
-void print_dataset(dataset *ds, int n, int header) {
-
+void print_dataset(dataset_t *ds, int n, int header) /* n, is number of lines of, so you can restrict the printout length */
+{
     int i, j;
-
     if (ds == NULL) {
         printout("%s%s\n", "Error: invalid dataset!");
         return;
     }
 
-    if (n == 0) {
+    if (n == 0)
         n = ds->n;
-    }
 
     if (header) {
         printout("%s%s\n", "Dataset: ", ds->handle);
@@ -172,25 +155,22 @@ void print_dataset(dataset *ds, int n, int header) {
         printout("%s%d\n", "Number of variables: ", ds->nvars);
     }
 
-    for (i = 0; i < ds->nvars; i++) {
+    for (i = 0; i < ds->nvars; i++)
         printout("%16s", ds->varnames[i]);
-    }
     printout("\n");
+
     for (i = 0; i < n; i++) {
         for (j = 0; j < ds->nvars; j++) {
             printout("%16.2f", ds->obs[i][j]);
         }
         printout("\n");
     }
-
     return;
-
 }
 
-
-dataset *add_dataset (char *handle, int nvars, char **varnames, int is_public) {
-
-    dataset *datasets, *ds;
+dataset_t *add_dataset (char *handle, int nvars, char **varnames, int is_public)
+{
+    dataset_t *datasets, *ds;
 
     printlog(VERBOSE, "%s%s\n%s%d\n", "add_dataset called with these arguments:\nHandle: ",
         handle, "Number of variables: ", nvars);
@@ -199,7 +179,7 @@ dataset *add_dataset (char *handle, int nvars, char **varnames, int is_public) {
     if (is_public && 1 + dataspace.n >= dataspace.size) {
         dataspace.size *= 2;
         printlog(VERBOSE, "Reallocating the dataspace with space for %d datasets\n", dataspace.size);
-        datasets = (dataset *) erealloc(dataspace.datasets, dataspace.size * sizeof(dataset));
+        datasets = (dataset_t*) erealloc(dataspace.datasets, dataspace.size * sizeof(dataset_t));
         dataspace.datasets = datasets;
     }
 
@@ -207,10 +187,8 @@ dataset *add_dataset (char *handle, int nvars, char **varnames, int is_public) {
     if (is_public) {
         ds = &dataspace.datasets[dataspace.n];
         dataspace.n++;
-    }
-    else {
-        ds = (dataset *) emalloc(sizeof(dataset));
-    }
+    } else
+        ds = (dataset_t*) emalloc(sizeof(dataset_t));
 
     ds->handle = estrdup(handle);
     ds->n = 0;
@@ -221,19 +199,16 @@ dataset *add_dataset (char *handle, int nvars, char **varnames, int is_public) {
     ds->values = (double *) emalloc(ds->size * ds->nvars * sizeof(double));
     ds->obs = (double **) emalloc(ds->size * ds->nvars * sizeof(double));
 
-    if (is_public) {
+    if (is_public)
         printlog(INFO, "%s%s\n", "New dataset created with handle: ", ds->handle);
-    }
-    else {
+    else
         printlog(VERBOSE, "%s%s\n", "New dataset created with handle: ", ds->handle);
-    }
 
     return ds;
 }
 
-
-void add_observation (dataset *ds, double *obs) {
-
+void add_observation (dataset_t *ds, double *obs)
+{
     int i;
 
     /* grow the array of values if needed */
@@ -260,93 +235,77 @@ void add_observation (dataset *ds, double *obs) {
 
 }
 
-
-void sort_dataset(dataset *ds, int n_cols) {
-
+void sort_dataset(dataset_t *ds, int n_cols)
+{
     compare_obs(NULL, &n_cols);
     qsort(ds->values, ds->n, ds->nvars * sizeof(double), compare_obs);
-
     return;
 }
 
-
-int compare_obs (const void *v1, const void *v2) {
-
+int compare_obs (const void *v1, const void *v2)
+{
     static int sort_columns = 1;
     const double *a = (const double *) v1;
     const double *b = (const double *) v2;
     int i;
 
-    /* trickery */
+    /* trickery, an empty v1 I suppose */
     if (v1 == NULL) {
         sort_columns = *(int *) v2;
         return 0;
     }
 
-    for (i = 0; i < sort_columns && a[i] == b[i]; i++);
+    for (i = 0; i < sort_columns && a[i] == b[i]; i++) ;
 
     return (a[i] > b[i]) - (a[i] < b[i]);
-
 }
 
-
-int find_observation(dataset *ds, double *obs, int n_vars) {
-
+int find_observation(dataset_t *ds, double *obs, int n_vars)
+{
     int i, j;
     int found = 0;
 
     /* search the first n_vars in dataset that match obs */
     for (i = 0; i < ds->n; i++) {
         for (j = 0; j < n_vars; j++) {
-            if (obs[j] != ds->obs[i][j]) {
+            if (obs[j] != ds->obs[i][j])
                 break;
-            }
         }
         if (j == n_vars) {
             found = 1;
             break;
         }
     }
-
-    if (found)
+    if(found)
         return i;
     else
         return -1;
-
 }
 
-
-dataset *find_dataset (char *handle) {
-
+dataset_t *find_dataset(char *handle)
+{
     /* search the dataspace for a dataset with the given handle */
     int i;
-    dataset *ds;
+    dataset_t *ds;
 
     printlog(VERBOSE, "%s%s\n", "Searching for dataset: ", handle);
 
     /* linear search is fine until n exceeds 30 or thereabouts */
-    for (i = 0; i < dataspace.n; i++) {
-        if (strcmp(handle, dataspace.datasets[i].handle) == 0) {
+    for (i = 0; i < dataspace.n; i++)
+        if (strcmp(handle, dataspace.datasets[i].handle) == 0)
             break;
-        }
-    }
 
     /* if we have exhausted the entire dataspace without finding the handle, return NULL */
     if (i < dataspace.n) {
         ds = &dataspace.datasets[i];
         printlog(VERBOSE, "%s%d\n", "Found at index: ", i);
-    }
-    else {
+    } else
         ds = NULL;
-    }
-
     return ds;
-
 }
 
-
-int find_varname (dataset *ds, char *varname) {
-
+int find_varname (dataset_t *ds, char *varname)
+{
     /* search for and return the index of a variable name in the given dataset */
     int i;
 
@@ -361,43 +320,30 @@ int find_varname (dataset *ds, char *varname) {
     }
 
     /* return the index of the variable, else -1 */
-    if (i < ds->nvars) {
+    if (i < ds->nvars)
         return i;
-    }
     else {
         printlog(VERBOSE, "%s\n", "Variable not found!");
         return -1;
     }
-
 }
 
-
-int set_weight_variable (dataset *ds, int var) {
-
+int set_weight_variable (dataset_t *ds, int var)
+{
     /* set and return the index of the variable, else -1 */
     if (var < ds->nvars) {
         printlog(INFO, "Setting weight variable to: '%s' (%d)\n", ds->varnames[var], var);
         ds->weight = var;
-    }
-    else {
+    } else {
         printlog(INFO, "%s%d\n", "Weight variable out of range: ", var);
         ds->weight = -1;
     }
-
     return ds->weight;
-
 }
 
-
-
-
-/* static function definitions */
-
-
-static int string_to_double(char *str, double* d) {
-
+static int string_to_double(char *str, double* d) /* means what it saysi, a wrapper for strtod() */
+{
     char *endptr;
-
     *d = strtod(str, &endptr);
 
     /***
@@ -423,19 +369,19 @@ static int string_to_double(char *str, double* d) {
         if (errno != 0) {
             /* Success, underflow */
             return 3;
-        }
-        else if (endptr - str == 0) {
+        } else if (endptr - str == 0) {
             /* FAIL */
             return -1;
-        }
-        else {
+        } else {
             /* Success */
             return 0;
         }
-    }
-    else if (isnan(*d))           return 4;   /* Success, NaN */
-    else if (isinf(*d) && *d > 0) return 1;   /* Success, +Inf */
-    else if (isinf(*d) && *d < 0) return 2;   /* Success, -Inf */
-    else return 0;  /* Success */
-
+    } else if (isnan(*d))
+        return 4;   /* Success, NaN */
+    else if (isinf(*d) && *d > 0)
+        return 1;   /* Success, +Inf */
+    else if (isinf(*d) && *d < 0)
+        return 2;   /* Success, -Inf */
+    else
+        return 0;  /* Success */
 }

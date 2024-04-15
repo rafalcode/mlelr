@@ -40,7 +40,7 @@ typedef struct {
     char      *name;      /* the name of the command */
     int_fp_v  *f;         /* pointer to the function to call for this command */
     char      *desc;      /* brief description of command */
-} COMMAND;
+} command_t;
 
 
 struct options options;
@@ -58,8 +58,9 @@ static int cmd_help (void);
 
 static void eprintf (char *fmt, ...);
 
+// watch this guy ... a global var ... based on struc command_t
 /* structure of commands */
-COMMAND cmds[] = {
+command_t cmds[] = {
     {"import", cmd_import, "Import a delimited text file."},
     {"print",  cmd_print,  "Print a dataset."},
     {"table",  cmd_table,  "Univariate frequency tabulation."},
@@ -74,7 +75,7 @@ COMMAND cmds[] = {
 };
 
 /* set globals */
-const char *MLELR_WELCOME = "mlelr - a reference implementation of logistic regression in C\nversion: 1.0\n";
+const char *MLELR_WELCOME = "mlelr - a reference implementation of logistic regression in C\nversion: 1.0rf\n";
 FILE *LOGFILE;
 FILE *OUTFILE;
 FILE *INPUTFILE;
@@ -83,36 +84,31 @@ const int SILENT    = 0;
 const int INFO      = 1;
 const int VERBOSE   = 2;
 
-
-int input_handler (void) {
-
+int input_handler (void)
+{
     int i;
     int retval;
     char *word;
 
-    /* display a prompt if we are reading from stdin */
-    if (INPUTFILE == stdin) {
+    /* display a prompt only if we are reading from stdin (i.e. no -f) */
+    if (INPUTFILE == stdin)
         printout("%s", "mlelr-> ");
-    }
 
     /* csvgetline will return NULL in one of two situations:
         1) we're out of memory
         2) we reached the EOF marker in an input file
         In both cases, we want to terminate the program. */
     if (csvgetline(INPUTFILE, ' ', 1) == NULL) {
-        if (INPUTFILE != stdin) {
+        if (INPUTFILE != stdin)
             printlog(VERBOSE, "%s\n", "Processing of input file is complete.");
-        }
-        else {
+        else
             printlog(VERBOSE, "%s\n", "Error reading input line from console.");
-        }
         return 1;
     }
 
     /* ignore blank or unparseable lines */
-    if (csvnfield() == 0) {
+    if (csvnfield() == 0)
         return 0;
-    }
 
     /* get the first word from the input */
     word = csvfield(0);
@@ -128,13 +124,10 @@ int input_handler (void) {
     }
 
     /* command not found, warn but do not signal to exit */
-    printlog(INFO, "%s%s\n%s\n", "Warning:  Command not found: ", word, "Enter 'help' for a list of available commands.");
+    printlog(INFO, "%s%s\n%s\n%s\n", "Warning: Command not found: ", word, " (you aren't feeding a dataset directly are you?)", "Pls use the command file. Enter 'help' for a list of available commands.");
 
     return 0;
 }
-
-
-
 
 /***
 
@@ -157,8 +150,8 @@ int input_handler (void) {
 
 ***/
 
-static int cmd_quit (void) {
-
+static int cmd_quit (void)
+{
     /* say goodbye! */
     printlog(INFO, "%s\n", "Exiting.  Bye!");
 
@@ -166,16 +159,15 @@ static int cmd_quit (void) {
     return 1;
 }
 
-
-static int cmd_comment (void) {
-
+static int cmd_comment (void)
+{
     /* do nothing, it's a comment */
     return 0;
 }
 
 
-static int cmd_import (void) {
-
+static int cmd_import (void)
+{
     char delim;
     char *handle;
     char *filename;
@@ -200,8 +192,7 @@ static int cmd_import (void) {
     if (strncmp(csvfield(3), "\\t", 2) == 0) {
         delim = '\t';
         printlog(VERBOSE, "%s\n", "Parsed delimiter: tab");
-    }
-    else {
+    } else {
         delim = csvfield(3)[0];
         if (delim == ' ')
             printlog(VERBOSE, "%s\n", "Parsed delimiter: space");
@@ -221,12 +212,11 @@ static int cmd_import (void) {
     return 0;
 }
 
-
-static int cmd_print (void) {
-
+static int cmd_print (void)
+{
     int numlines;
     char *handle;
-    dataset *ds;
+    dataset_t *ds;
 
     printlog(VERBOSE, "%s\n", "Entering 'cmd_print'");
 
@@ -242,31 +232,26 @@ static int cmd_print (void) {
 
     ds = find_dataset(handle);
 
-    if (ds == NULL) {
+    if(ds == NULL)
         printlog(INFO, "%s%s\n", "Error:  dataset not found: ", handle);
-    }
-    else {
+    else
         print_dataset(ds, numlines, 1);
-    }
 
     free(handle);
-
     return 0;
 }
 
-
-static int cmd_weight (void) {
-
+static int cmd_weight (void)
+{
     char *handle, *varname;
-    dataset *ds;
+    dataset_t *ds;
     int var;
 
     printlog(VERBOSE, "%s\n", "Entering 'cmd_weight'");
 
     /* warn and return if we do not have the required number of arguments */
-    if (csvnfield() != 3) {
+    if (csvnfield() != 3)
         printlog(INFO, "%s\n", "Syntax error: weight expects 2 arguments:  handle varname");
-    }
 
     handle = estrdup(csvfield(1));
     varname = estrdup(csvfield(2));
@@ -274,7 +259,6 @@ static int cmd_weight (void) {
     printlog(VERBOSE, "%s%s%s%s\n", "Arguments to weight:\nHandle: ", handle, "\nWeight variable: ", varname);
 
     ds = find_dataset(handle);
-
     if (ds == NULL) {
         printlog(INFO, "%s%s\n", "Error:  dataset not found: ", handle);
         free(handle);
@@ -283,33 +267,27 @@ static int cmd_weight (void) {
     }
 
     var = find_varname(ds, varname);
-
-    if (var == -1) {
+    if (var == -1)
         printlog(INFO, "%s%s\n", "Error:  variable not found: ", varname);
-    }
-    else {
+    else
         set_weight_variable(ds, var);
-    }
 
     free(handle);
     free(varname);
-
     return 0;
 }
 
-
-static int cmd_table (void) {
-
+static int cmd_table (void)
+{
     char *handle, *varname;
-    dataset *ds;
+    dataset_t *ds;
     int var;
 
     printlog(VERBOSE, "%s\n", "Entering 'cmd_table'");
 
     /* warn and return if we do not have the required number of arguments */
-    if (csvnfield() != 3) {
+    if (csvnfield() != 3)
         printlog(INFO, "%s\n", "Syntax error: table expects 2 arguments:  handle varname");
-    }
 
     handle = estrdup(csvfield(1));
     varname = estrdup(csvfield(2));
@@ -327,12 +305,10 @@ static int cmd_table (void) {
 
     var = find_varname(ds, varname);
 
-    if (var == -1) {
+    if (var == -1)
         printlog(INFO, "%s%s\n", "Error:  variable not found: ", varname);
-    }
-    else {
+    else
         frequency_table(ds, var);
-    }
 
     free(handle);
     free(varname);
@@ -340,10 +316,10 @@ static int cmd_table (void) {
     return 0;
 }
 
+static int cmd_logreg (void)
+{
 
-static int cmd_logreg (void) {
-
-    dataset *ds;
+    dataset_t *ds;
     model   *mod;
     char    syntax_error_msg[] = "Syntax error: logreg expects a dataset handle, followed by a dependent variable name, followed by \" = \" (note the spaces), followed by one or more main effects and optional interaction effects.\nSpecify interactions with an asterisk, as in var1*var2\nSpecify direct effects by preceding with \"direct.\", as in direct.var1";
     int     i;
@@ -396,32 +372,25 @@ static int cmd_logreg (void) {
 
             while (varname != NULL) {
                 endvar = strchr(varname, '*');
-                if (endvar != NULL) endvar[0] = '\0';
-                if (strcmp(varname, csvfield(i)) == 0) {
+                if (endvar != NULL)
+                    endvar[0] = '\0';
+                if (strcmp(varname, csvfield(i)) == 0)
                     retval = add_model_variable(mod, ds, varname, NEW_INTERACTION);
-                }
-                else {
+                else
                     retval = add_model_variable(mod, ds, varname, INTERACTION);
-                }
-                if (retval) break;
-                if (endvar == NULL) {
+                if (retval)
+                    break;
+                if (endvar == NULL)
                     varname = NULL;
-                }
-                else {
+                else
                     varname = endvar + 1;
-                }
             }
-
-        }
-
-        /* is this a direct effect? */
-        else if (strlen(csvfield(i)) >= 8 && strncmp("direct.", csvfield(i), 7) == 0) {
+        } else if (strlen(csvfield(i)) >= 8 && strncmp("direct.", csvfield(i), 7) == 0) {
+            /* is this a direct effect? */
             varname = csvfield(i) + 7;
             retval = add_model_variable(mod, ds, varname, DIRECT);
-        }
-
-        /* otherwise this is a categorical main effect */
-        else {
+        } else {
+            /* otherwise this is a categorical main effect */
             varname = csvfield(i);
             retval = add_model_variable(mod, ds, varname, MAIN);
         }
@@ -432,9 +401,7 @@ static int cmd_logreg (void) {
             delete_model(mod);
             return 0;
         }
-
     }   /* end parsing independent variables */
-
 
     /* NOTE:  We do not check for duplicate interactions */
 
@@ -452,17 +419,15 @@ static int cmd_logreg (void) {
     return 0;
 }
 
-
-static int cmd_option (void) {
-
+static int cmd_option (void)
+{
     char *k, *v;
 
     printlog(VERBOSE, "%s\n", "Entering 'cmd_option'");
 
     /* warn and return if we do not have the required number of arguments */
-    if (csvnfield() != 3) {
+    if (csvnfield() != 3)
         printlog(INFO, "%s\n", "Syntax error: option expects 2 arguments:  key value");
-    }
 
     k = csvfield(1);
     v = csvfield(2);
@@ -474,26 +439,22 @@ static int cmd_option (void) {
     return 0;
 }
 
-
-static int cmd_help (void) {
-
+static int cmd_help (void)
+{
     int i;
 
     printlog(VERBOSE, "%s\n", "Entering 'cmd_help'");
-
     printout("%s%s", MLELR_WELCOME, "Available commands:\n");
 
     /* walk through array of commands and print help text */
-    for (i = 0; cmds[i].name; i++) {
+    for (i = 0; cmds[i].name; i++)
         printout("%    -12s%s\n", cmds[i].name, cmds[i].desc);
-    }
 
     return 0;
 }
 
-
-void init_options (void) {
-
+void init_options (void)
+{
     /* Run once at program start-up */
 
     options.n = 0;
@@ -503,30 +464,20 @@ void init_options (void) {
     options.v = (char **) emalloc(options.size * sizeof(char *));
 
     set_option("params", "centerpoint");
-
-
 }
 
-
-char *get_option (char *k) {
-
+char *get_option (char *k)
+{
     int i;
-
-    for (i = 0; i < options.n; i++) {
-        if (strncmp(k, options.k[i], strlen(options.k[i])) == 0) {
+    for (i = 0; i < options.n; i++)
+        if (strncmp(k, options.k[i], strlen(options.k[i])) == 0)
             return options.v[i];
-        }
-    }
-
     return NULL;
-
 }
 
-
-void set_option (char *k, char *v) {
-
+void set_option (char *k, char *v)
+{
     int i, found;
-
     for (i = 0, found = 0; i < options.n; i++) {
         if (strncmp(k, options.k[i], strlen(options.k[i])) == 0) {
             found = 1;
@@ -547,20 +498,13 @@ void set_option (char *k, char *v) {
     else {
         options.v[i] = estrdup(v);
     }
-
 }
 
-
-
-
 /***
-
     Input/output convenience functions
-
 ***/
-
-void printlog (int loglevel, char *format, ...) {
-
+void printlog (int loglevel, char *format, ...)
+{
     va_list args;
 
     /* only print if the loglevel argument is less than or equal to the
@@ -576,22 +520,17 @@ void printlog (int loglevel, char *format, ...) {
         vfprintf(LOGFILE, format, args);
         va_end(args);
     }
-
 }
 
-
-void printout (char *format, ...) {
+void printout (char *format, ...)
+{
     va_list args;
     va_start(args, format);
 	vfprintf(OUTFILE, format, args);
 	va_end(args);
 }
 
-
-
-
 /***
-
     Wrappers for memory allocation.
 
     When using malloc and other related functions that request dynamic memory,
@@ -615,45 +554,33 @@ void printout (char *format, ...) {
 
 ***/
 
-void *emalloc (size_t n) {
-
-	void *p;
-
-	p = malloc(n);
-	if (p == NULL) {
+void *emalloc(size_t n)
+{
+	void *p = malloc(n);
+	if (p == NULL)
 		eprintf("Fatal error!  malloc of %u bytes failed:", n);
-	}
 	return p;
-
 }
 
-void *erealloc (void *vp, size_t n) {
-
-	void *p;
-
-	p = realloc(vp, n);
-	if (p == NULL) {
+void *erealloc (void *vp, size_t n)
+{
+	void *p = realloc(vp, n);
+	if (p == NULL)
 		eprintf("Fatal error!  realloc of %u bytes failed:", n);
-	}
 	return p;
-
 }
 
-char *estrdup (char *s) {
-
-	char *t;
-
-	t = (char *) malloc(strlen(s)+1);
-	if (t == NULL) {
+char *estrdup (char *s)
+{
+	char *t = (char *) malloc(strlen(s)+1);
+	if (t == NULL)
 		eprintf("Fatal error!  estrdup(\"%.20s\") failed:", s);
-	}
 	strcpy(t, s);
 	return t;
-
 }
 
-static void eprintf (char *fmt, ...) {
-
+static void eprintf (char *fmt, ...)
+{
 	va_list args;
 
 	fflush(stdout);
@@ -665,5 +592,4 @@ static void eprintf (char *fmt, ...) {
 		fprintf(LOGFILE, " %s", strerror(errno));
 	fprintf(LOGFILE, "\n");
 	exit(2);
-
 }

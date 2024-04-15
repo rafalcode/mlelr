@@ -54,10 +54,8 @@ static int newton_raphson (
     double  *loglike,
     double  *deviance  );
 
-
-
-int mlelr (dataset *ds, model *mod) {
-
+int mlelr (dataset_t *ds, model *mod)
+{
     int i, j, k, q;
     int popchange;
     int lastpop;
@@ -96,7 +94,6 @@ int mlelr (dataset *ds, model *mod) {
     int nrret;
     double chi1, chi2, df1, df2, chitest1, chitest2;
 
-
     printlog(VERBOSE, "Entering mlelr.\n");
 
     /***
@@ -116,7 +113,6 @@ int mlelr (dataset *ds, model *mod) {
     xtabrows = mod->xtab->n;
     xtabcols = mod->xtab->nvars;
 
-
     /***
         Step 2.  Count the number of populations and set a population index
         for each row in the xtab.
@@ -131,22 +127,19 @@ int mlelr (dataset *ds, model *mod) {
 
     /* loop through remainder of xtab */
     for (i = 1; i < xtabrows; i++) {
-
         popchange = 0;
-
         /* check each independent variable against its predecessor */
-        for (j = 0; j < xtabcols - 2; j++) {
+        for (j = 0; j < xtabcols - 2; j++)
             if (xtab[i][j] != xtab[i-1][j]) {
                 popchange = 1;
                 break;
             }
-        }
 
-        if (popchange) N++;
+        if (popchange)
+            N++;
         popindex[i] = N - 1;
         M += xtab[i][xtabcols - 1];
     }
-
 
     /***
         Step 3.  Count number of cols needed in X and Y
@@ -159,14 +152,11 @@ int mlelr (dataset *ds, model *mod) {
     for (i = 0, K = 1; i < mod->numiv; i++) {
 
         /* if direct effect, this variable will have 1 column in X */
-        if (mod->direct[i]) {
+        if (mod->direct[i])
             K += 1;
-        }
-
-        /* otherwise, it will have levelcount - 1 columns in X */
-        else {
+        else
+            /* otherwise, it will have levelcount - 1 columns in X */
             K += (mod->freqs[i]->n - 1);
-        }
     }
 
     /* add columns for interactions, if any */
@@ -178,7 +168,6 @@ int mlelr (dataset *ds, model *mod) {
         }
         K += k;
     }
-
 
     /***
         Step 4.  Allocate space for model vectors and matrices
@@ -422,6 +411,7 @@ int mlelr (dataset *ds, model *mod) {
 
         /* run an iteration, exit if failure */
         nrret = newton_raphson(X, Y, n, J, N, K, beta0, beta, xtwx, loglike, deviance);
+        if(!nrret) printf("This line in here to at least use the return val from NewtonRaph (%i), if not zero, then it did not complete properly\n", nrret);
 
         /* NOTE:  Backtracking code would go here, not currently implemented */
 
@@ -550,8 +540,6 @@ int mlelr (dataset *ds, model *mod) {
 
 }
 
-
-
 static int newton_raphson (
     double **X,     /* design matrix, N rows by K cols */
     double **Y,     /* response matrix, N rows by J-1 cols */
@@ -563,9 +551,8 @@ static int newton_raphson (
     double  *beta1, /* parameters after this iteration */
     double **xtwx,
     double  *loglike,
-    double  *deviance  ) {
-
-
+    double  *deviance)
+{
     /* local variable declarations */
     double **pi;
     double  *g;     /* gradient vector: first derivative of ll */
@@ -709,7 +696,6 @@ static int newton_raphson (
         beta1[i] = sum1;
     }
 
-
     /* free local memory */
     free(numer);
     free(g);
@@ -723,9 +709,8 @@ static int newton_raphson (
     return 0;
 }
 
-
-static int cholesky(double **x, int order) {
-
+static int cholesky(double **x, int order)
+{
     int i, j, k;
     double sum;
     int ret = 0;
@@ -750,14 +735,15 @@ static int cholesky(double **x, int order) {
     return ret;
 }
 
-static int backsub(double **x, int order) {
-
+static int backsub(double **x, int order)
+{
     int i, j, k;
     double sum;
 
-    if (x[0][0] == 0) return 1;
-
+    if (x[0][0] == 0)
+        return 1;
     x[0][0] = 1 / x[0][0];
+
     for (i = 1; i < order; i++) {
         if (x[i][i] == 0) return 1;
         x[i][i] = 1 / x[i][i];
@@ -768,12 +754,11 @@ static int backsub(double **x, int order) {
             x[j][i] = -sum * x[i][i];
         }
     }
-
     return 0;
 }
 
-static int trimult(double **in, double **out, int order) {
-
+static int trimult(double **in, double **out, int order)
+{
     int i, j, k, m;
     double sum;
 
@@ -789,6 +774,5 @@ static int trimult(double **in, double **out, int order) {
             out[i][j] = sum;
         }
     }
-
     return 0;
 }

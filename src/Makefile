@@ -1,5 +1,6 @@
 CC=gcc
-CFLAGS=-Wall -g -pg -lm -lgsl -lgslcblas
+# CFLAGS=-fPIC -Wall -g -pg -lm -lgsl -lgslcblas
+CFLAGS=-fPIC -Wall -g -pg -lm -lgsl -lgslcblas
 
 mlelr: main.o csv.o dataset.o model.o interface.o tabulate.o mlelr.o 
 	$(CC) -o mlelr main.o csv.o dataset.o model.o interface.o tabulate.o mlelr.o $(CFLAGS)

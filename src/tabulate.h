@@ -25,7 +25,7 @@ Copyright (C) 2015 Scott A. Czepiel
 #define TABULATE_H__
 
 /* forward declarations for publically available functions defined in tabulate.c */
-extern int tabulate (dataset *ds, model *mod);
-extern int frequency_table (dataset *ds, int var);
+extern int tabulate (dataset_t *ds, model *mod);
+extern int frequency_table (dataset_t *ds, int var);
 
 #endif

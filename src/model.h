@@ -43,8 +43,8 @@ typedef struct {
     int     **ints;    /* interactions matrix, rows=interactions, cols=index in numiv */
     char    **intnames;/* array of interaction names, eg. "var1*var2" */
 
-    dataset *xtab;      /* cross-tabulation of all model variables */
-    dataset **freqs;    /* array of frequency tables for all model variables */
+    dataset_t *xtab;      /* cross-tabulation of all model variables */
+    dataset_t **freqs;    /* array of frequency tables for all model variables */
 
 } model;
 
@@ -62,6 +62,6 @@ enum model_variable {
 extern void init_model (model *mod);
 extern void delete_model (model *mod);
 extern void print_model (model *mod);
-extern int add_model_variable (model *mod, dataset *ds, char *varname, int vartype);
+extern int add_model_variable (model *mod, dataset_t *ds, char *varname, int vartype);
 
 #endif

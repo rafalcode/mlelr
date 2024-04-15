@@ -28,9 +28,8 @@ Copyright (C) 2015 Scott A. Czepiel
 #include "model.h"
 #include "interface.h"
 
-
-void init_model (model *mod) {
-
+void init_model (model *mod)
+{
     mod->maxiv = 1;
     mod->numiv = 0;
     mod->ivnames = (char **) emalloc(mod->maxiv * sizeof(char *));
@@ -41,16 +40,16 @@ void init_model (model *mod) {
     mod->inttc = (int *) emalloc(mod->maxints * sizeof(int));
     mod->ints = (int **) emalloc(mod->maxints * sizeof(int *));
     mod->intnames = (char **) emalloc(mod->maxints * sizeof(char *));
-
 }
 
-void delete_model (model *mod) {
+void delete_model (model *mod)
+{
     /* This feature is currently unavailable. */
     return;
 }
 
-void print_model (model *mod) {
-
+void print_model (model *mod)
+{
     int i, j;
 
     printout("Dependent variable: %s\n", mod->dvname);
@@ -78,12 +77,10 @@ void print_model (model *mod) {
                 printout("]\n");
         }
     }
-
 }
 
-
-int add_model_variable (model *mod, dataset *ds, char *varname, int vartype) {
-
+int add_model_variable (model *mod, dataset_t *ds, char *varname, int vartype)
+{
     int varidx, ividx;
     int i;
     int found = 0;
@@ -113,9 +110,8 @@ int add_model_variable (model *mod, dataset *ds, char *varname, int vartype) {
 
     /* find the variable name and fail if not found */
     varidx = find_varname(ds, varname);
-    if (varidx == -1) {
+    if (varidx == -1)
         return 1;
-    }
 
     /* add the DEPENDENT variable to the model */
     if (vartype == DEPENDENT) {
@@ -125,26 +121,21 @@ int add_model_variable (model *mod, dataset *ds, char *varname, int vartype) {
     }
 
     /* search the array of main effects */
-    for (i = 0; i < mod->numiv; i++) {
+    for (i = 0; i < mod->numiv; i++)
         if (varidx == mod->iv[i]) {
             found = 1;
             ividx = i;
             break;
         }
-    }
 
     /* warn and return success, if MAIN or DIRECT variable already exists */
     if (found && (vartype == MAIN || vartype == DIRECT)) {
         printlog(INFO, "%s%s\n", "Warning: variable already exists in model: ", varname);
         return 0;
-    }
-
-    else if (!found) {
-
+    } else if (!found) {
         /* warn if this is an interaction effect without a main effect */
-        if (vartype == NEW_INTERACTION || vartype == INTERACTION) {
+        if (vartype == NEW_INTERACTION || vartype == INTERACTION)
             printlog(INFO, "%s%s\n", "Warning: this interaction variable will also be added as a main effect: ", varname);
-        }
 
         /* space check */
         if (1 + mod->numiv > mod->maxiv) {
@@ -160,12 +151,10 @@ int add_model_variable (model *mod, dataset *ds, char *varname, int vartype) {
         mod->direct[mod->numiv] = (vartype == DIRECT) ? 1 : 0;
         printlog(VERBOSE, "Setting direct array index %d to value %d\n", mod->numiv, mod->direct[mod->numiv]);
         mod->numiv++;
-
     }
 
     /* add a new interaction */
     if (vartype == NEW_INTERACTION) {
-
         /* space check */
         if (1 + mod->numints > mod->maxints) {
             mod->maxints *= 2;
@@ -183,19 +172,17 @@ int add_model_variable (model *mod, dataset *ds, char *varname, int vartype) {
         mod->inttc[mod->numints] = 1;
         mod->intnames[mod->numints] = estrdup(varname);
         mod->numints++;
-
     }
 
     /* append to an existing interaction */
     if (vartype == INTERACTION) {
 
         /* search the terms in the latest interaction and warn if already found */
-        for (i = 0, found = 0; i < mod->inttc[mod->numints-1]; i++) {
+        for (i = 0, found = 0; i < mod->inttc[mod->numints-1]; i++)
             if (ividx == mod->ints[mod->numints-1][i]) {
                 found = 1;
                 break;
             }
-        }
 
         /* warn if found */
         if (found) {
@@ -212,8 +199,6 @@ int add_model_variable (model *mod, dataset *ds, char *varname, int vartype) {
         strcat(intname, varname);
         mod->intnames[mod->numints-1] = estrdup(intname);
         mod->inttc[mod->numints-1] += 1;
-
     }
-
     return 0;
 }

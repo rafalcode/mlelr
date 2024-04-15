@@ -31,34 +31,21 @@ Copyright (C) 2015 Scott A. Czepiel
 void print_help (void);
 void init (void);
 
-
-void init (void) {
-
-    LOGFILE = stderr;
-    OUTFILE = stdout;
-    INPUTFILE = stdin;
-    LOGLEVEL = INFO;
-
-}
-
-
-void print_help (void) {
-
+void print_help (void)
+{
     printlog(LOGLEVEL, "%s%s", MLELR_WELCOME,
-    "Available command line arguments:\n \
-    -f or -file:    read and execute commands from the named file\n \
-    -o or -out:     redirect output to a file \n \
+    "Available command line arguments (single dash only, no double dashes catered for):\n \
+    -f or -file:    read and execute commands from a \"schedule\" file\n \
+    -o or -out:     redirect output to an output file \n \
     -l or -log:     redirect log messages to a file\n \
     -v or -verbose: log extra detail to the log file\n \
     -s or -silent:  suppress all logging information\n \
     -h or -help:    print this message\n"
     );
-
 }
 
-
-int main (int argc, char *argv[]) {
-
+int main (int argc, char *argv[])
+{
     char *p;
     int curarg     = 1;
     int badarg     = 0;
@@ -68,7 +55,12 @@ int main (int argc, char *argv[]) {
     int retval     = 0;
     int loglevel   = INFO;
 
-    init();
+    // Default Options Values
+    // (init() was a stupid function)
+    LOGFILE = stderr;
+    OUTFILE = stdout;
+    INPUTFILE = stdin;
+    LOGLEVEL = INFO;
 
     /* process command line arguments */
     while (curarg < argc && !badarg) {
@@ -79,23 +71,19 @@ int main (int argc, char *argv[]) {
 
         /* Process current arg */
         switch (p[0]) {
-
             /* -f or -file */
             case 'f':
-
                 if (strlen(p) == 1 ||  strcmp(p, "file") == 0) {
                     arg_input = curarg + 1;
-                    if (arg_input >= argc) badarg = 1;
+                    if (arg_input >= argc)
+                        badarg = 1;
                     curarg = curarg + 2;
-                }
-                else {
+                } else
                     badarg = 1;
-                }
                 break;
 
             /* -o or -out */
             case 'o':
-
                 if (strlen(p) == 1 ||  strcmp(p, "out") == 0) {
                     arg_out = curarg + 1;
                     if (arg_out >= argc) badarg = 1;
@@ -108,7 +96,6 @@ int main (int argc, char *argv[]) {
 
             /* -l or -log */
             case 'l':
-
                 if (strlen(p) == 1 ||  strcmp(p, "log") == 0) {
                     arg_log = curarg + 1;
                     if (arg_log >= argc) badarg = 1;
@@ -121,31 +108,24 @@ int main (int argc, char *argv[]) {
 
             /* -v or -verbose */
             case 'v':
-
                 if (strlen(p) == 1 ||  strcmp(p, "verbose") == 0) {
                     loglevel = VERBOSE;
                     curarg++;
-                }
-                else {
+                } else
                     badarg = 1;
-                }
                 break;
 
             /* -s or -silent */
             case 's':
-
                 if (strlen(p) == 1 ||  strcmp(p, "silent") == 0) {
                     loglevel = SILENT;
                     curarg++;
-                }
-                else {
+                } else
                     badarg = 1;
-                }
                 break;
 
             /* -h or -help */
             case 'h':
-
                 if (strlen(p) == 1 ||  strcmp(p, "help") == 0) {
                     /* we can't accept -h with any other arguments */
                     if (curarg == 1) {
@@ -155,8 +135,7 @@ int main (int argc, char *argv[]) {
                     else {
                         badarg = 1;
                     }
-                }
-                else {
+                } else {
                     badarg = 1;
                 }
                 break;
@@ -167,6 +146,8 @@ int main (int argc, char *argv[]) {
         }   /* end switch on current arg */
 
     }   /* end while valid args exist */
+    /* update the global loglevel */
+    LOGLEVEL = loglevel;
 
     /* notify and exit if badarg */
     if (badarg) {
@@ -196,11 +177,8 @@ int main (int argc, char *argv[]) {
         return 0;
     }
 
-    /* update the global loglevel */
-    LOGLEVEL = loglevel;
-
     /* initialize the dataspace and global options */
-    init_dataspace();
+    init_dataspace(); // from dataset.c
     init_options();
 
     /* print a welcome message */
@@ -208,14 +186,16 @@ int main (int argc, char *argv[]) {
 
     /* continue to call our input handler function until we receive a non-zero value
         indicating it is time to quit */
-    while (!retval) {
-        retval = input_handler();
-    }
+    while (!retval)
+        retval = input_handler(); // from interface.c
 
     /* close any open files */
-    if (arg_input && INPUTFILE != stdin) fclose(INPUTFILE);
-    if (arg_out && OUTFILE != stdout) fclose(OUTFILE);
-    if (arg_log && LOGFILE != stderr) fclose(LOGFILE);
+    if (arg_input && INPUTFILE != stdin)
+        fclose(INPUTFILE);
+    if (arg_out && OUTFILE != stdout)
+        fclose(OUTFILE);
+    if (arg_log && LOGFILE != stderr)
+        fclose(LOGFILE);
 
     return 0;
 }

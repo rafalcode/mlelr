@@ -1,0 +1,128 @@
+CC	Makefile	/^CC=gcc$/
+CFLAGS	Makefile	/^CFLAGS=-Wall -g -pg -lm -lgsl -lgslcblas$/
+COMMAND	interface.c	43
+CSV_H__	csv.h	2
+DATASET_H__	dataset.h	25
+DEPENDENT	model.h	52
+DIRECT	model.h	54
+EPSILON	mlelr.c	38
+INFO	interface.c	83
+INPUTFILE	interface.c	80
+INTERACTION	model.h	56
+INTERFACE_H__	interface.h	25
+LOGFILE	interface.c	78
+LOGLEVEL	interface.c	81
+MAIN	model.h	53
+MAX_ITER	mlelr.c	37
+MLELR_H__	mlelr.h	25
+MLELR_WELCOME	interface.c	77
+MODEL_H__	model.h	25
+Mmain	main.c	/^int main (int argc, char *argv[])$/
+NEW_INTERACTION	model.h	55
+NOMEM	csv.c	39
+OUTFILE	interface.c	79
+SILENT	interface.c	82
+SYSMIS	dataset.c	41
+TABULATE_H__	tabulate.h	25
+VERBOSE	interface.c	84
+add_dataset	dataset.c	/^dataset *add_dataset (char *handle, int nvars, cha/
+add_model_variable	model.c	/^int add_model_variable (model *mod, dataset *ds, c/
+add_observation	dataset.c	/^void add_observation (dataset *ds, double *obs) {$/
+advquoted	csv.c	/^static char *advquoted(char *p, char delim)$/
+backsub	mlelr.c	/^static int backsub(double **x, int order)$/
+cholesky	mlelr.c	/^static int cholesky(double **x, int order)$/
+clean	Makefile	/^clean:$/
+cmd_comment	interface.c	/^static int cmd_comment (void)$/
+cmd_help	interface.c	/^static int cmd_help (void)$/
+cmd_import	interface.c	/^static int cmd_import (void)$/
+cmd_logreg	interface.c	/^static int cmd_logreg (void)$/
+cmd_option	interface.c	/^static int cmd_option (void)$/
+cmd_print	interface.c	/^static int cmd_print (void)$/
+cmd_quit	interface.c	/^static int cmd_quit (void)$/
+cmd_table	interface.c	/^static int cmd_table (void)$/
+cmd_weight	interface.c	/^static int cmd_weight (void)$/
+cmds	interface.c	62
+compare_obs	dataset.c	/^int compare_obs (const void *v1, const void *v2) {/
+csvfield	csv.c	/^char *csvfield(int n)$/
+csvgetline	csv.c	/^char *csvgetline(FILE *fin, char delim, int compre/
+csvnfield	csv.c	/^int csvnfield(void)$/
+dataset	dataset.h	43
+datasets	dataset.h	48
+dataspace	dataset.c	43
+dataspace	dataset.h	45
+delete_model	model.c	/^void delete_model (model *mod)$/
+desc	interface.c	42
+direct	model.h	39
+dv	model.h	34
+dvname	model.h	33
+emalloc	interface.c	/^void *emalloc(size_t n)$/
+endofline	csv.c	/^static int endofline(FILE *fin, int c)$/
+eprintf	interface.c	/^static void eprintf (char *fmt, ...)$/
+erealloc	interface.c	/^void *erealloc (void *vp, size_t n)$/
+estrdup	interface.c	/^char *estrdup (char *s)$/
+f	interface.c	41
+field	csv.c	44
+find_dataset	dataset.c	/^dataset *find_dataset (char *handle) {$/
+find_observation	dataset.c	/^int find_observation(dataset *ds, double *obs, int/
+find_varname	dataset.c	/^int find_varname (dataset *ds, char *varname) {$/
+freqs	model.h	47
+frequency_table	tabulate.c	/^int frequency_table (dataset *ds, int var)$/
+freqvars	tabulate.c	32
+get_option	interface.c	/^char *get_option (char *k)$/
+handle	dataset.h	35
+import_dataset	dataset.c	/^int import_dataset (char *handle, char *filename, /
+init	main.c	/^void init (void)$/
+init_dataspace	dataset.c	/^void init_dataspace (void) {$/
+init_model	model.c	/^void init_model (model *mod)$/
+init_options	interface.c	/^void init_options (void)$/
+input_handler	interface.c	/^int input_handler (void)$/
+int_fp_v	interface.c	37
+intnames	model.h	44
+ints	model.h	43
+inttc	model.h	42
+iv	model.h	38
+ivnames	model.h	37
+k	interface.h	41
+line	csv.c	41
+maxfield	csv.c	45
+maxints	model.h	41
+maxiv	model.h	36
+maxline	csv.c	43
+mlelr	Makefile	/^mlelr: main.o csv.o dataset.o model.o interface.o /
+mlelr	mlelr.c	/^int mlelr (dataset *ds, model *mod)$/
+model	model.h	49
+model_variable	model.h	51
+n	dataset.h	36
+n	dataset.h	46
+n	interface.h	39
+name	interface.c	40
+newton_raphson	mlelr.c	/^static int newton_raphson ($/
+nfield	csv.c	46
+numints	model.h	40
+numiv	model.h	35
+nvars	dataset.h	38
+obs	dataset.h	41
+options	interface.c	46
+options	interface.h	38
+print_dataset	dataset.c	/^void print_dataset(dataset *ds, int n, int header)/
+print_help	main.c	/^void print_help (void)$/
+print_model	model.c	/^void print_model (model *mod)$/
+printlog	interface.c	/^void printlog (int loglevel, char *format, ...)$/
+printout	interface.c	/^void printout (char *format, ...)$/
+reset	csv.c	/^static void reset(void)$/
+set_option	interface.c	/^void set_option (char *k, char *v)$/
+set_weight_variable	dataset.c	/^int set_weight_variable (dataset *ds, int var) {$/
+size	dataset.h	37
+size	dataset.h	47
+size	interface.h	40
+sline	csv.c	42
+sort_dataset	dataset.c	/^void sort_dataset(dataset *ds, int n_cols) {$/
+split	csv.c	/^static int split(char delim, int compress)$/
+string_to_double	dataset.c	/^static int string_to_double(char *str, double* d) /
+tabulate	tabulate.c	/^int tabulate (dataset *ds, model *mod)$/
+trimult	mlelr.c	/^static int trimult(double **in, double **out, int /
+v	interface.h	42
+values	dataset.h	40
+varnames	dataset.h	39
+weight	dataset.h	42
+xtab	model.h	46

@@ -24,6 +24,6 @@ Copyright (C) 2015 Scott A. Czepiel
 #ifndef MLELR_H__
 #define MLELR_H__
 
-extern int mlelr (dataset *ds, model *mod);
+extern int mlelr (dataset_t *ds, model *mod);
 
 #endif
